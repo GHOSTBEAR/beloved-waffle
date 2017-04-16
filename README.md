@@ -20,14 +20,8 @@ Grabs most popular/highest rated shows on [Kitsu][1]
 	```
 1. Run the script: 
 	```
-	python beloved.py
+	python beloved.py [-h] [-g GENRE] [-l LIMIT] [-y YEAR] [-s SORT]
 	```
-1. Follow instructions:
-    
-    The script will ask some questions these can be left blank for default settings
-
-## TODO
-* Questions into parameters
 
 ## License
 All code released under the [Unlicense][4]

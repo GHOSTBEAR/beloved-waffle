@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# from sys import argv
+import argparse
 import requests
 import datetime
 import json
@@ -13,44 +13,33 @@ def get(url, payload):
     except Exception as e:
         print response
         raise e
-
-def question(array, fallback):
-    for item in array:
-        print item
     
-    return raw_input('>>> ') or fallback
-
-description = [
-    '-- Genre --',
-    'Default: all',
-]
-category = question(description , 'all')
-print
-
-description = [
-    '-- Limit --',
-    'Default: 10'
-]
-limit = question(description , 10)
-print
-
 current = datetime.datetime.now()
-description = [
-    '-- Year --',
-    'Format: from..to',
-    'Default: 1907..%d' % current.year,
-    'Exampel: 2010..2016'
-]
-year =  question(description , '1907..%d' % current.year)
-print
 
-description = [
-    '-- Sort By --',
-    'Default: -userCount',
-    'Alternative: -averageRating'
-]
-sort =  question(description , '-userCount')
-print
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-g', "--genre", 
+                    help="Filter by genre (default: all)", 
+                    default='all')
+parser.add_argument('-l', "--limit", 
+                    help="Limit amount of shows displayed (default: 10, max: 20)", 
+                    default=10)
+parser.add_argument('-y', "--year", 
+                    help="Filter by year (default: 1907..%d, format: from..to)" % current.year, 
+                    default='1907..%d' % current.year)
+parser.add_argument('-s', "--sort", 
+                    help="Filter by most popular/highest rated (default: popular)", 
+                    default='popular')
+
+args = parser.parse_args()
+
+category = args.genre
+
+limit = args.limit
+
+year =  args.year
+
+sort = '-userCount' if args.sort == 'popular' else '-averageRating'
 
 print 'Top %s %s\'s between %s' % (limit, category.capitalize(), year.replace('..', ' to '))
 
@@ -61,11 +50,14 @@ else:
     options = {'page[limit]': limit, 'page[offset]': 0, 'filter[year]': year, 'sort': sort}
     res = get(URL, options)
 
-for position, item in enumerate(res['data'], start=1):
-    print '%d: %s, number of user %d average rating %s' % (
-        position,
-        item['attributes']['canonicalTitle'], 
-        item['attributes']['userCount'],
-        item['attributes']['averageRating']
-    )
-    print
+try:
+    for position, item in enumerate(res['data'], start=1):
+        print '%d: %s, number of user %d average rating %s' % (
+            position,
+            item['attributes']['canonicalTitle'], 
+            item['attributes']['userCount'],
+            item['attributes']['averageRating']
+        )
+        print
+except:
+    print res['errors'][0]['detail']
